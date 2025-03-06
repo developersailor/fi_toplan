@@ -94,11 +94,13 @@ class _NearestGatheringAreaViewState extends State<NearestGatheringAreaView> {
       '&destination=${destination.latitude},${destination.longitude}'
       '&travelmode=driving',
     );
-
+    developer.log('Constructed URL: $url');
     // URL'yi aç
     if (await canLaunchUrl(url)) {
+      developer.log('Can launch URL: $url');
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
+      developer.log('Cannot launch URL: $url');
       // URL açılamazsa hata göster
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -160,35 +162,36 @@ class _NearestGatheringAreaViewState extends State<NearestGatheringAreaView> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage.isNotEmpty
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _errorMessage.isNotEmpty
               ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.red,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _errorMessage,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: _loadNearestArea,
-                          child: const Text('Tekrar Dene'),
-                        ),
-                      ],
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _errorMessage,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _loadNearestArea,
+                        child: const Text('Tekrar Dene'),
+                      ),
+                    ],
                   ),
-                )
+                ),
+              )
               : _buildContent(),
     );
   }
@@ -257,8 +260,8 @@ class _NearestGatheringAreaViewState extends State<NearestGatheringAreaView> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () =>
-                          _openGoogleMapsDirections(areaCoordinates),
+                      onPressed:
+                          () => _openGoogleMapsDirections(areaCoordinates),
                       icon: const Icon(Icons.directions),
                       label: const Text('Google Maps ile Yol Tarifi Al'),
                       style: ElevatedButton.styleFrom(

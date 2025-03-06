@@ -4,7 +4,7 @@ version: 1.0.0+1
 publish_to: none
 
 environment:
-  sdk: ^3.5.0
+  sdk: ^3.7.0
 
 dependencies:
   auto_route: ^9.3.0+1
@@ -18,13 +18,6 @@ dependencies:
     sdk: flutter
   get_it: ^8.0.3
   google_fonts: ^6.2.1
-  #modules
-  common:
-    path: module/common
-  core:
-    path: module/core
-  widgets:
-    path: module/widgets
   intl: ^0.19.0
   kartal: ^4.1.0
   logger: ^2.5.0
