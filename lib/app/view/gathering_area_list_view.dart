@@ -1,4 +1,5 @@
 import 'package:fi_toplan/app/view/nearest_gathering_area_view.dart';
+import 'package:fi_toplan/app/view/nearby_gathering_areas_view.dart';
 import 'package:fi_toplan/models/gathering_area.dart';
 import 'package:fi_toplan/services/gathering_area_service.dart';
 import 'package:flutter/material.dart';
@@ -42,27 +43,72 @@ class _GatheringAreaListViewState extends State<GatheringAreaListView> {
           final gatheringAreas = snapshot.data!;
           return Column(
             children: [
-              // En yakın toplanma alanı butonunu ekledik
+              // Konum temelli navigasyon butonları
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const NearestGatheringAreaView(),
+                child: Column(
+                  children: [
+                    // En yakın toplanma alanı butonu
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const NearestGatheringAreaView(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.near_me),
+                      label: const Text('En Yakın Toplanma Alanını Bul'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 50),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.near_me),
-                  label: const Text('En Yakın Toplanma Alanını Bul'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
+                    ),
+                    
+                    const SizedBox(height: 12),
+                    
+                    // 500 metre içindeki toplanma alanları butonu
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const NearbyGatheringAreasView(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.radar),
+                      label: const Text('500m İçindeki Toplanma Alanları'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-
+              
+              // Alanlar listesi başlığı
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Icon(Icons.list_alt, size: 18),
+                    SizedBox(width: 8),
+                    Text(
+                      'Tüm Toplanma Alanları',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 8),
+              
               // Alanlar listesi
               Expanded(
                 child: ListView.builder(
@@ -151,11 +197,13 @@ class _GatheringAreaListViewState extends State<GatheringAreaListView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          areaName,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            areaName,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         IconButton(
@@ -314,7 +362,8 @@ class GatheringAreaMultiMapView extends StatefulWidget {
       _GatheringAreaMultiMapViewState();
 }
 
-class _GatheringAreaMultiMapViewState extends State<GatheringAreaMultiMapView> {
+class _GatheringAreaMultiMapViewState
+    extends State<GatheringAreaMultiMapView> {
   late int _selectedAreaIndex;
   final MapController _mapController = MapController();
 
