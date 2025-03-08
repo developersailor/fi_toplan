@@ -7,7 +7,7 @@ environment:
   sdk: ^3.7.0
 
 dependencies:
-  auto_route: ^9.3.0+1
+  auto_route: ^10.0.1
   bloc: ^8.1.4
   easy_logger: ^0.0.2
   equatable: ^2.0.7
@@ -32,7 +32,7 @@ dependencies:
   shared_preferences: ^2.5.2
 
 dev_dependencies:
-  auto_route_generator: ^9.0.0
+  auto_route_generator: ^10.0.1
   bloc_test: ^9.1.7
   build_runner: ^2.4.15
   device_preview: ^1.2.0
