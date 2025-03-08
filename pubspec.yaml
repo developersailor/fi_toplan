@@ -29,6 +29,7 @@ dependencies:
   geolocator: ^13.0.2
   geo_distance_calculator: ^1.1.2
   url_launcher: ^6.2.5
+  shared_preferences: ^2.5.2
 
 dev_dependencies:
   auto_route_generator: ^9.0.0

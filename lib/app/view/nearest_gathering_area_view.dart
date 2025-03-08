@@ -103,12 +103,9 @@ class _NearestGatheringAreaViewState extends State<NearestGatheringAreaView> {
       developer.log('Cannot launch URL: $url');
       // URL açılamazsa hata göster
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google Maps açılamadı'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Google Maps açılamadı')));
       }
     }
   }

@@ -1,5 +1,6 @@
-import 'package:fi_toplan/app/app.dart';
 import 'package:flutter/material.dart';
+import 'package:fi_toplan/theme/theme.dart';
+import 'package:fi_toplan/app/view/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,10 +13,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Gathering Areas',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const App(),
+      theme: const MaterialTheme(TextTheme()).light(),
+      home: const SplashScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

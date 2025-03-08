@@ -28,6 +28,17 @@ class _GatheringAreaListViewState extends State<GatheringAreaListView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Toplanma Alanları'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: GatheringAreaSearchDelegate(futureGatheringAreas),
+              );
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<GatheringArea>>(
         future: futureGatheringAreas,
@@ -52,43 +63,41 @@ class _GatheringAreaListViewState extends State<GatheringAreaListView> {
                     ElevatedButton.icon(
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const NearestGatheringAreaView(),
+                          MaterialPageRoute<NearestGatheringAreaView>(
+                            builder:
+                                (context) => const NearestGatheringAreaView(),
                           ),
                         );
                       },
                       icon: const Icon(Icons.near_me),
                       label: const Text('En Yakın Toplanma Alanını Bul'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 50),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
+
                     // 500 metre içindeki toplanma alanları butonu
                     ElevatedButton.icon(
                       onPressed: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const NearbyGatheringAreasView(),
+                          MaterialPageRoute<NearbyGatheringAreasView>(
+                            builder:
+                                (context) => const NearbyGatheringAreasView(),
                           ),
                         );
                       },
                       icon: const Icon(Icons.radar),
                       label: const Text('500m İçindeki Toplanma Alanları'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 50),
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               // Alanlar listesi başlığı
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -106,9 +115,9 @@ class _GatheringAreaListViewState extends State<GatheringAreaListView> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Alanlar listesi
               Expanded(
                 child: ListView.builder(
@@ -135,9 +144,7 @@ class _GatheringAreaListViewState extends State<GatheringAreaListView> {
                           areaName,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        subtitle: Text(
-                          '$il, $ilce, $mahalle',
-                        ),
+                        subtitle: Text('$il, $ilce, $mahalle'),
                         trailing: const Icon(Icons.map_outlined),
                         onTap: () {
                           _showMapBottomSheet(context, gatheringAreas, index);
@@ -165,7 +172,7 @@ class _GatheringAreaListViewState extends State<GatheringAreaListView> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true, // Makes the bottom sheet full screen
-      backgroundColor: Colors.transparent,
+
       builder: (BuildContext context) {
         return DraggableScrollableSheet(
           initialChildSize: 0.9, // Takes 90% of the screen
@@ -176,7 +183,6 @@ class _GatheringAreaListViewState extends State<GatheringAreaListView> {
             return Container(
               padding: const EdgeInsets.only(top: 10),
               decoration: const BoxDecoration(
-                color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Column(
@@ -186,7 +192,6 @@ class _GatheringAreaListViewState extends State<GatheringAreaListView> {
                     width: 40,
                     height: 5,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
@@ -230,6 +235,118 @@ class _GatheringAreaListViewState extends State<GatheringAreaListView> {
   }
 }
 
+class GatheringAreaSearchDelegate extends SearchDelegate<GatheringArea> {
+  final Future<List<GatheringArea>> futureGatheringAreas;
+
+  GatheringAreaSearchDelegate(this.futureGatheringAreas);
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(
+          context,
+          GatheringArea(id: '', geometryName: '', geometry: {}, properties: {}),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return FutureBuilder<List<GatheringArea>>(
+      future: futureGatheringAreas,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Hata: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('Toplanma alanı bulunamadı'));
+        }
+        final results =
+            snapshot.data!.where((area) {
+              final areaName =
+                  area.properties['ad']?.toString().toLowerCase() ?? '';
+              return areaName.contains(query.toLowerCase());
+            }).toList();
+        return ListView.builder(
+          itemCount: results.length,
+          itemBuilder: (context, index) {
+            final area = results[index];
+            final areaName =
+                area.properties['ad']?.toString() ?? 'İsimsiz Alan';
+            final il = area.properties['il']?.toString() ?? '';
+            final ilce = area.properties['ilce']?.toString() ?? '';
+            final mahalle = area.properties['mahalle']?.toString() ?? '';
+            return ListTile(
+              title: Text(areaName),
+              subtitle: Text('$il, $ilce, $mahalle'),
+              onTap: () {
+                close(context, area);
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return FutureBuilder<List<GatheringArea>>(
+      future: futureGatheringAreas,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Hata: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('Toplanma alanı bulunamadı'));
+        }
+        final results =
+            snapshot.data!.where((area) {
+              final areaName =
+                  area.properties['ad']?.toString().toLowerCase() ?? '';
+              return areaName.contains(query.toLowerCase());
+            }).toList();
+        return ListView.builder(
+          itemCount: results.length,
+          itemBuilder: (context, index) {
+            final area = results[index];
+            final areaName =
+                area.properties['ad']?.toString() ?? 'İsimsiz Alan';
+            final il = area.properties['il']?.toString() ?? '';
+            final ilce = area.properties['ilce']?.toString() ?? '';
+            final mahalle = area.properties['mahalle']?.toString() ?? '';
+            return ListTile(
+              title: Text(areaName),
+              subtitle: Text('$il, $ilce, $mahalle'),
+              onTap: () {
+                query = areaName;
+                showResults(context);
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
 class GatheringAreaMapView extends StatelessWidget {
   GatheringAreaMapView({required this.area});
   final GatheringArea area;
@@ -256,9 +373,7 @@ class GatheringAreaMapView extends StatelessWidget {
       final mahalle = area.properties['mahalle']?.toString() ?? '';
 
       return Scaffold(
-        appBar: AppBar(
-          title: Text(areaName),
-        ),
+        appBar: AppBar(title: Text(areaName)),
         body: FlutterMap(
           options: MapOptions(
             onTap: (tapPosition, point) {
@@ -295,9 +410,11 @@ class GatheringAreaMapView extends StatelessWidget {
               polygons: [
                 Polygon(
                   points: points,
-                  color: Colors.blue.withOpacity(0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withAlpha((0.3 * 255).toInt()),
                   borderStrokeWidth: 3,
-                  borderColor: Colors.blue,
+                  borderColor: Theme.of(context).colorScheme.primary,
                 ),
               ],
             ),
@@ -362,8 +479,7 @@ class GatheringAreaMultiMapView extends StatefulWidget {
       _GatheringAreaMultiMapViewState();
 }
 
-class _GatheringAreaMultiMapViewState
-    extends State<GatheringAreaMultiMapView> {
+class _GatheringAreaMultiMapViewState extends State<GatheringAreaMultiMapView> {
   late int _selectedAreaIndex;
   final MapController _mapController = MapController();
 
@@ -441,12 +557,19 @@ class _GatheringAreaMultiMapViewState
               Polygon(
                 points: points,
                 // Selected area is highlighted in blue, others are gray
-                color: i == _selectedAreaIndex
-                    ? Colors.blue.withOpacity(0.3)
-                    : Colors.grey.withOpacity(0.15),
+                color:
+                    i == _selectedAreaIndex
+                        ? Theme.of(
+                          context,
+                        ).colorScheme.primary.withAlpha((0.3 * 255).toInt())
+                        : Theme.of(
+                          context,
+                        ).colorScheme.secondary.withAlpha((0.15 * 255).toInt()),
                 borderStrokeWidth: i == _selectedAreaIndex ? 3.0 : 1.0,
                 borderColor:
-                    i == _selectedAreaIndex ? Colors.blue : Colors.grey,
+                    i == _selectedAreaIndex
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.secondary,
               ),
             );
           }
@@ -544,7 +667,7 @@ class _GatheringAreaMultiMapViewState
               margin: const EdgeInsets.all(10),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
@@ -693,12 +816,17 @@ class _GatheringAreaBottomSheetMapViewState
             allPolygons.add(
               Polygon(
                 points: points,
-                color: i == _selectedAreaIndex
-                    ? Colors.blue.withOpacity(0.3)
-                    : Colors.grey.withOpacity(0.15),
+                color:
+                    i == _selectedAreaIndex
+                        ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
+                        : Theme.of(
+                          context,
+                        ).colorScheme.secondary.withOpacity(0.15),
                 borderStrokeWidth: i == _selectedAreaIndex ? 3.0 : 1.0,
                 borderColor:
-                    i == _selectedAreaIndex ? Colors.blue : Colors.grey,
+                    i == _selectedAreaIndex
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.secondary,
               ),
             );
           }
@@ -793,15 +921,22 @@ class _GatheringAreaBottomSheetMapViewState
                 right: 0,
                 child: Center(
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withAlpha((0.3 * 255).toInt()),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withAlpha(100),
                           blurRadius: 4,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
@@ -859,9 +994,10 @@ class _GatheringAreaBottomSheetMapViewState
                         Navigator.pop(context);
                         _selectArea(index);
                       },
-                      trailing: index == _selectedAreaIndex
-                          ? const Icon(Icons.check_circle, color: Colors.blue)
-                          : null,
+                      trailing:
+                          index == _selectedAreaIndex
+                              ? const Icon(Icons.check_circle)
+                              : null,
                     );
                   },
                 ),

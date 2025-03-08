@@ -49,14 +49,14 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
       }
 
       _currentPosition = position;
-      
+
       // Tüm toplanma alanlarını getir
       final allAreas = await _service.fetchGatheringAreas();
-      
+
       // 500 metre içindeki alanları filtrele
       final nearbyAreas = <GatheringArea>[];
       final distances = <double>[];
-      
+
       for (final area in allAreas) {
         final areaCoordinates = _extractCoordinates(area);
         if (areaCoordinates != null) {
@@ -66,7 +66,7 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
             areaCoordinates.latitude,
             areaCoordinates.longitude,
           );
-          
+
           if (distance <= _maxDistance) {
             nearbyAreas.add(area);
             distances.add(distance);
@@ -77,7 +77,7 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
       setState(() {
         _isLoading = false;
         _nearbyAreas = nearbyAreas;
-        
+
         // Eğer hiç yakın alan bulunamadıysa hata mesajı göster
         if (nearbyAreas.isEmpty) {
           _errorMessage = '500 metre içinde toplanma alanı bulunamadı.';
@@ -123,24 +123,21 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
   // Google Maps'te yol tarifi için URL açma
   Future<void> _openGoogleMapsDirections(LatLng destination) async {
     if (_currentPosition == null) return;
-    
+
     final url = Uri.parse(
       'https://www.google.com/maps/dir/?api=1'
       '&origin=${_currentPosition!.latitude},${_currentPosition!.longitude}'
       '&destination=${destination.latitude},${destination.longitude}'
       '&travelmode=driving',
     );
-    
+
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google Maps açılamadı'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Google Maps açılamadı')));
       }
     }
   }
@@ -167,35 +164,32 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage.isNotEmpty
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _errorMessage.isNotEmpty
               ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.red,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _errorMessage,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: _loadNearbyAreas,
-                          child: const Text('Tekrar Dene'),
-                        ),
-                      ],
-                    ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 64),
+                      const SizedBox(height: 16),
+                      Text(
+                        _errorMessage,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _loadNearbyAreas,
+                        child: const Text('Tekrar Dene'),
+                      ),
+                    ],
                   ),
-                )
+                ),
+              )
               : _buildContent(),
     );
   }
@@ -211,7 +205,7 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
-          color: Colors.blue.shade50,
+
           child: Column(
             children: [
               Text(
@@ -226,13 +220,13 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
                 'Konumunuzdan 500 metre yarıçap içinde',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade700,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
             ],
           ),
         ),
-        
+
         // Harita
         SizedBox(
           height: 200,
@@ -259,11 +253,7 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
                     ),
                     width: 40,
                     height: 40,
-                    child: const Icon(
-                      Icons.my_location,
-                      color: Colors.blue,
-                      size: 30,
-                    ),
+                    child: const Icon(Icons.my_location, size: 30),
                   ),
                 ],
               ),
@@ -284,29 +274,30 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
               ),
               // Toplanma alanları için marker'lar
               MarkerLayer(
-                markers: _nearbyAreas
-                    .map((area) {
-                      final coords = _extractCoordinates(area);
-                      if (coords == null) return null;
-                      
-                      return Marker(
-                        point: coords,
-                        width: 30,
-                        height: 30,
-                        child: const Icon(
-                          Icons.location_on,
-                          color: Colors.red,
-                          size: 24,
-                        ),
-                      );
-                    })
-                    .whereType<Marker>()
-                    .toList(),
+                markers:
+                    _nearbyAreas
+                        .map((area) {
+                          final coords = _extractCoordinates(area);
+                          if (coords == null) return null;
+
+                          return Marker(
+                            point: coords,
+                            width: 30,
+                            height: 30,
+                            child: const Icon(
+                              Icons.location_on,
+                              color: Colors.red,
+                              size: 24,
+                            ),
+                          );
+                        })
+                        .whereType<Marker>()
+                        .toList(),
               ),
             ],
           ),
         ),
-        
+
         // Toplanma alanları listesi
         Expanded(
           child: ListView.builder(
@@ -314,15 +305,16 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
             itemCount: _nearbyAreas.length,
             itemBuilder: (context, index) {
               final area = _nearbyAreas[index];
-              final areaName = area.properties['ad']?.toString() ?? 'İsimsiz Alan';
+              final areaName =
+                  area.properties['ad']?.toString() ?? 'İsimsiz Alan';
               final il = area.properties['il']?.toString() ?? '';
               final ilce = area.properties['ilce']?.toString() ?? '';
               final mahalle = area.properties['mahalle']?.toString() ?? '';
-              
+
               // Mesafeyi hesapla
               final areaCoords = _extractCoordinates(area);
               String distance = 'Mesafe hesaplanamadı';
-              
+
               if (areaCoords != null && _currentPosition != null) {
                 final distanceMeters = Geolocator.distanceBetween(
                   _currentPosition!.latitude,
@@ -353,12 +345,17 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.directions_walk, size: 16, color: Colors.blue),
+                          const Icon(
+                            Icons.directions_walk,
+                            size: 16,
+                            color: Colors.blue,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             distance,
-                            style: const TextStyle(
-                              color: Colors.blue,
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context).textTheme.bodyMedium?.color,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -366,13 +363,18 @@ class _NearbyGatheringAreasViewState extends State<NearbyGatheringAreasView> {
                       ),
                     ],
                   ),
-                  trailing: areaCoords != null
-                      ? IconButton(
-                          icon: const Icon(Icons.directions, color: Colors.green),
-                          onPressed: () => _openGoogleMapsDirections(areaCoords),
-                          tooltip: 'Yol Tarifi Al',
-                        )
-                      : null,
+                  trailing:
+                      areaCoords != null
+                          ? IconButton(
+                            icon: const Icon(
+                              Icons.directions,
+                              color: Colors.green,
+                            ),
+                            onPressed:
+                                () => _openGoogleMapsDirections(areaCoords),
+                            tooltip: 'Yol Tarifi Al',
+                          )
+                          : null,
                   isThreeLine: true,
                 ),
               );
