@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:fi_toplan/models/gathering_area.dart';
+import 'package:fi_toplan/app/models/gathering_area.dart';
 import 'dart:developer' as developer;
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -8,8 +8,9 @@ import 'package:latlong2/latlong.dart';
 class GatheringAreaService {
   Future<List<GatheringArea>> fetchGatheringAreas() async {
     try {
-      final response =
-          await rootBundle.loadString('assets/toplanma_alanlari.json');
+      final response = await rootBundle.loadString(
+        'assets/toplanma_alanlari.json',
+      );
       final data = json.decode(response) as Map<String, dynamic>;
       final features = data['features'] as List<dynamic>;
 

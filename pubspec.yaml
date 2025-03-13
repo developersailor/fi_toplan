@@ -7,21 +7,13 @@ environment:
   sdk: ^3.7.0
 
 dependencies:
-  auto_route: ^9.3.0+1
-  bloc: ^8.1.4
-  easy_logger: ^0.0.2
-  equatable: ^2.0.7
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.6
   flutter_localizations:
     sdk: flutter
-  get_it: ^8.0.3
-  google_fonts: ^6.2.1
+
   intl: ^0.19.0
-  kartal: ^4.1.0
-  logger: ^2.5.0
-  vexana: ^5.0.3
+
   json_annotation: ^4.9.0
   lottie: ^2.7.0
   flutter_map: ^8.1.0
@@ -30,12 +22,10 @@ dependencies:
   geo_distance_calculator: ^1.1.2
   url_launcher: ^6.2.5
   shared_preferences: ^2.5.2
+  kartal: ^4.1.0
 
 dev_dependencies:
-  auto_route_generator: ^9.0.0
-  bloc_test: ^9.1.7
-  build_runner: ^2.4.15
-  device_preview: ^1.2.0
+  build_runner: ^2.4.6
   flutter_launcher_icons: ^0.14.3
   flutter_test:
     sdk: flutter
