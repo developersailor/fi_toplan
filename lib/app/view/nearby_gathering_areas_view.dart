@@ -1,5 +1,5 @@
-import 'package:fi_toplan/models/gathering_area.dart';
-import 'package:fi_toplan/services/gathering_area_service.dart';
+import 'package:fi_toplan/app/models/gathering_area.dart';
+import 'package:fi_toplan/app/services/gathering_area_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
